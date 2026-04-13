@@ -85,26 +85,26 @@ final class MovieQuizViewController: UIViewController {
         super.viewDidLoad()
         
         showFirstQuestion()
-        
     }
     
-    private func showFirstQuestion() {
-        currentQuestionIndex = 0
-        let currentQuestion = questions[currentQuestionIndex]
-        let step = convert(model: currentQuestion)
-        show(quiz: step)
-        
-    }
     
+    @IBOutlet weak var noButton: UIButton!
+    @IBOutlet weak var yesButton: UIButton!
     @IBOutlet private var questionLabel: UILabel!
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
     
+    private func showFirstQuestion() {
+        currentQuestionIndex = 0
+        imageView.layer.cornerRadius = 20
+        let currentQuestion = questions[currentQuestionIndex]
+        let step = convert(model: currentQuestion)
+        show(quiz: step)
+    }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         let isCorrect = questions[currentQuestionIndex].correctAnswer == false
         showAnswerResult(isCorrect: isCorrect)
-        
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
@@ -129,14 +129,14 @@ final class MovieQuizViewController: UIViewController {
         if isCorrect {
             correctAnswers += 1
         }
-        
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.cornerRadius = 20
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
-        
+        setAnswerButtonsEnabled(false)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
+            self.setAnswerButtonsEnabled(true)
         }
     }
     
@@ -193,6 +193,11 @@ final class MovieQuizViewController: UIViewController {
         }
         alert.addAction(action)
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
+        yesButton.isEnabled = isEnabled
+        noButton.isEnabled = isEnabled
     }
 }
 
