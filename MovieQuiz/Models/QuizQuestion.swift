@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct QuizQuestion {
+public struct QuizQuestion: Hashable {
     let image: String
     let text: String
     let correctAnswer: Bool

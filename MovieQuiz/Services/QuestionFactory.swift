@@ -6,7 +6,16 @@
 //
 import Foundation
 
-class QuestionFactory {
+public protocol QuestionFactoryProtocol {
+    func requestNextQuestion() //-> QuizQuestion?
+    func reset()
+    func takeAmountOfQuestions() -> Int
+}
+
+public class QuestionFactory: QuestionFactoryProtocol {
+    
+    weak var delegate: QuestionFactoryDelegate?
+    
     private let questions: [QuizQuestion] = [
         QuizQuestion(
             image: "The Godfather",
@@ -50,10 +59,28 @@ class QuestionFactory {
             correctAnswer: false)
     ]
     
-    func requestNextQuestion() -> QuizQuestion? {
-        guard let index = (0..<questions.count).randomElement() else {
-            return nil
+    private lazy var currentRoundQuestions: [QuizQuestion] = questions
+    
+    init(delegate: QuestionFactoryDelegate? = nil) {
+        self.delegate = delegate
     }
-        return questions[safe: index]
+    
+    public func requestNextQuestion() {
+        guard let index = (0..<currentRoundQuestions.count).randomElement() else {
+            delegate?.didReceiveNextQuestion(question: nil)
+           return 
+        }
+        
+        let question = currentRoundQuestions[safe: index]
+        currentRoundQuestions.remove(at: index)
+        delegate?.didReceiveNextQuestion(question: question)
+    }
+    
+    public func reset() {
+        currentRoundQuestions = questions
+    }
+    
+    public func takeAmountOfQuestions() -> Int {
+        questions.count
     }
 }
