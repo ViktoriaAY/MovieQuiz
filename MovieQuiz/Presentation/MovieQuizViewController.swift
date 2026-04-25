@@ -17,6 +17,7 @@ final class MovieQuizViewController: UIViewController {
         case forward
     }
     
+    private var alertPresenter = AlertPresenter()
     weak var delegate: QuestionFactoryDelegate?
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -92,7 +93,7 @@ final class MovieQuizViewController: UIViewController {
     private func showNextQuestionOrResults() {
         resetImageBorder()
         if currentQuestionIndex ==  questionsAmount - 1 {
-            showAllert(quiz: .init(title: "Этот раунд окончен!",
+            show(quiz: .init(title: "Этот раунд окончен!",
                                    text: "Ваш результат: \(correctAnswers) / \(questionsAmount)",
                                    buttonText: "Сыграть ещё раз"))
         }
@@ -112,20 +113,34 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.borderWidth = 0
     }
     
-    private func showAllert(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(title: result.title,
-                                      message: result.text,
-                                      preferredStyle: .alert)
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            self.questionFactory?.reset()
-            questionFactory?.requestNextQuestion()
-        }
-        alert.addAction(action)
-        self.present(alert, animated: true, completion: nil)
+    private func restartGame() {
+        self.currentQuestionIndex = 0
+        self.correctAnswers = 0
+        self.questionFactory?.reset()
+        questionFactory?.requestNextQuestion()
     }
+    func show(quiz result: QuizResultsViewModel) {
+        let model = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
+            guard let self = self else { return }
+            self.restartGame()
+        }
+        
+        alertPresenter.showAllert(model: model, ui: self)
+    }
+//    private func showAllert(quiz result: QuizResultsViewModel) {
+//        let alert = UIAlertController(title: result.title,
+//                                      message: result.text,
+//                                      preferredStyle: .alert)
+//        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+//            guard let self = self else { return }
+//            self.currentQuestionIndex = 0
+//            self.correctAnswers = 0
+//            self.questionFactory?.reset()
+//            questionFactory?.requestNextQuestion()
+//        }
+//        alert.addAction(action)
+//        self.present(alert, animated: true, completion: nil)
+//    }
     
     private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
         yesButton.isEnabled = isEnabled
