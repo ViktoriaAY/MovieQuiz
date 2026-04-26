@@ -17,7 +17,8 @@ final class MovieQuizViewController: UIViewController {
         case forward
     }
     
-    private var alertPresenter = AlertPresenter()
+    private var statisticService = StatisticService()
+    private var alertPresenter = ResultAlertPresenter()
     weak var delegate: QuestionFactoryDelegate?
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -93,9 +94,19 @@ final class MovieQuizViewController: UIViewController {
     private func showNextQuestionOrResults() {
         resetImageBorder()
         if currentQuestionIndex ==  questionsAmount - 1 {
-            show(quiz: .init(title: "Этот раунд окончен!",
-                                   text: "Ваш результат: \(correctAnswers) / \(questionsAmount)",
-                                   buttonText: "Сыграть ещё раз"))
+            statisticService.storeCurrentResult(currentResult: GameResult(
+                correct: correctAnswers,
+                total: questionsAmount,
+                date: Date()
+            ))
+            let message = makeResultMessageAlert()
+            show(
+                quiz: .init(
+                    title: "Этот раунд окончен!",
+                    text: message,
+                    buttonText: "Сыграть ещё раз"
+                )
+            )
         }
         else {
             updateViewControllerState(screenDirection: .forward)
@@ -119,28 +130,24 @@ final class MovieQuizViewController: UIViewController {
         self.questionFactory?.reset()
         questionFactory?.requestNextQuestion()
     }
-    func show(quiz result: QuizResultsViewModel) {
+    
+    private func makeResultMessageAlert() -> String {
+        let bestGame = statisticService.bestGame
+        let currentResultText = "Ваш результат: \(correctAnswers) / \(questionsAmount)"
+        let gamesCountText = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+        let bestGameResultText = "Рекорд: \(bestGame.correct) / \(bestGame.total) (\(bestGame.date.dateTimeString))"
+        let totalAccuracyText = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+        
+        return currentResultText + "\n" + gamesCountText + "\n" + bestGameResultText + "\n" + totalAccuracyText
+    }
+    
+    private func show(quiz result: QuizResultsViewModel) {
         let model = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
             guard let self = self else { return }
-            self.restartGame()
+            restartGame()
         }
-        
-        alertPresenter.showAllert(model: model, ui: self)
+        alertPresenter.showAlert(model: model, ui: self)
     }
-//    private func showAllert(quiz result: QuizResultsViewModel) {
-//        let alert = UIAlertController(title: result.title,
-//                                      message: result.text,
-//                                      preferredStyle: .alert)
-//        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-//            guard let self = self else { return }
-//            self.currentQuestionIndex = 0
-//            self.correctAnswers = 0
-//            self.questionFactory?.reset()
-//            questionFactory?.requestNextQuestion()
-//        }
-//        alert.addAction(action)
-//        self.present(alert, animated: true, completion: nil)
-//    }
     
     private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
         yesButton.isEnabled = isEnabled
