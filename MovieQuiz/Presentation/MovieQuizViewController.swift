@@ -17,7 +17,7 @@ final class MovieQuizViewController: UIViewController {
         case forward
     }
     
-    private var statisticService = StatisticService()
+    private var statisticService: StatisticServiceProtocol = StatisticService()
     private var alertPresenter = ResultAlertPresenter()
     weak var delegate: QuestionFactoryDelegate?
     private var currentQuestionIndex = 0

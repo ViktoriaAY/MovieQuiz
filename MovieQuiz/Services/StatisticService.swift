@@ -13,27 +13,27 @@ private enum Keys: String {
     case bestGameTotal
     case bestGameDate
     case totalAccuracy
-    case totalCorrectAnswers
-    case totalQuestionsAsked
+    case correct
+    case total
 }
 
 final class StatisticService: StatisticServiceProtocol {
     
     private let userDefaults: UserDefaults = .standard
-    private var totalCorrectAnswers: Int {
+    private var correct: Int {
         get {
-            userDefaults.integer(forKey: Keys.totalCorrectAnswers.rawValue)
+            userDefaults.integer(forKey: Keys.correct.rawValue)
         }
         set {
-            userDefaults.set(newValue, forKey: Keys.totalCorrectAnswers.rawValue)
+            userDefaults.set(newValue, forKey: Keys.correct.rawValue)
         }
     }
-    private var totalQuestionsAsked: Int {
+    private var total: Int {
         get {
-            userDefaults.integer(forKey: Keys.totalQuestionsAsked.rawValue)
+            userDefaults.integer(forKey: Keys.total.rawValue)
         }
         set {
-            userDefaults.set(newValue, forKey: Keys.totalQuestionsAsked.rawValue)
+            userDefaults.set(newValue, forKey: Keys.total.rawValue)
         }
     }
     
@@ -63,16 +63,16 @@ final class StatisticService: StatisticServiceProtocol {
     
     var totalAccuracy: Double {
         get {
-            guard totalQuestionsAsked != 0 else { return 0 }
-            return (Double(totalCorrectAnswers) / Double(totalQuestionsAsked)) * 100
+            guard total != 0 else { return 0 }
+            return (Double(correct) / Double(total)) * 100
         }
     }
     
     func storeCurrentResult(currentResult: GameResult) {
-        totalCorrectAnswers += currentResult.correct
-        totalQuestionsAsked += currentResult.total
+        correct += currentResult.correct
+        total += currentResult.total
         gamesCount += 1
-        if currentResult.comparisonRecords(with: bestGame) {
+        if currentResult.store(with: bestGame) {
             bestGame = currentResult
         }
     }

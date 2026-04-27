@@ -11,7 +11,7 @@ struct GameResult {
     let total: Int
     let date: Date
     
-    func comparisonRecords (with other: GameResult) -> Bool {
-        return self.correct >= other.correct  
+    func store (with other: GameResult) -> Bool {
+        return self.correct > other.correct
     }
 }
