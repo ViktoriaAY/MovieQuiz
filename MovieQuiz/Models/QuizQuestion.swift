@@ -8,7 +8,7 @@
 import Foundation
 
 public struct QuizQuestion: Hashable {
-    let image: String
+    let image: Data
     let text: String
     let correctAnswer: Bool
 }
