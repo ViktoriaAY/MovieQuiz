@@ -17,6 +17,7 @@ final class MovieQuizViewController: UIViewController {
         case forward
     }
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     private var statisticService: StatisticServiceProtocol = StatisticService()
     private var alertPresenter = ResultAlertPresenter()
     weak var delegate: QuestionFactoryDelegate?
@@ -152,6 +153,21 @@ final class MovieQuizViewController: UIViewController {
     private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
         yesButton.isEnabled = isEnabled
         noButton.isEnabled = isEnabled
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func showNetworkError(message: String) {
+        activityIndicator.stopAnimating()
+        
+        let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+            restartGame()
+        }
+        alertPresenter.showAlert(model: model, ui: self)
     }
 }
 
