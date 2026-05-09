@@ -72,7 +72,7 @@ final class StatisticService: StatisticServiceProtocol {
         correct += currentResult.correct
         total += currentResult.total
         gamesCount += 1
-        if currentResult.store(with: bestGame) {
+        if currentResult.correct > bestGame.correct {
             bestGame = currentResult
         }
     }

@@ -18,7 +18,7 @@ struct MoviesLoader: MoviesLoading {
     // MARK: - URL
     private var mostPopularMoviesURL: URL {
         guard let url = URL(string: "https://tv-api.com/en/API/Top250Movies/k_zcuw1ytf") else {
-            preconditionFailure("Unable to construct mostPopularMoviesUrl")
+            preconditionFailure("Невозможно загрузить данные")
         }
         return url
     }
@@ -36,8 +36,6 @@ struct MoviesLoader: MoviesLoading {
             case .failure(let error):
                 handler(.failure(error))
             }
-            
-            
         }
     }
 }

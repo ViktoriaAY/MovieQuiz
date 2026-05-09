@@ -23,16 +23,17 @@ final class MovieQuizViewController: UIViewController {
     weak var delegate: QuestionFactoryDelegate?
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
-    private lazy var questionsAmount: Int = questionFactory?.takeAmountOfQuestions() ?? 0
+    private var questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //questionFactory = QuestionFactory(delegate: self)
-        showFirstQuestion()
         questionFactory = QuestionFactory(moviesLoader:  MoviesLoader(), delegate: self)
         showLoadingIndicator()
+        questionFactory?.loadData()
+     showFirstQuestion()
     }
     
     @IBOutlet weak var noButton: UIButton!
@@ -130,7 +131,7 @@ final class MovieQuizViewController: UIViewController {
     private func restartGame() {
         self.currentQuestionIndex = 0
         self.correctAnswers = 0
-        self.questionFactory?.reset()
+       // self.questionFactory?.reset()
         questionFactory?.requestNextQuestion()
     }
     
@@ -165,7 +166,7 @@ final class MovieQuizViewController: UIViewController {
     private func showNetworkError(message: String) {
         activityIndicator.stopAnimating()
         
-        let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
+        let model = AlertModel(title: "Что-то пошло не так(", message: message, buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else { return }
             restartGame()
         }
@@ -175,12 +176,12 @@ final class MovieQuizViewController: UIViewController {
 
 extension MovieQuizViewController: QuestionFactoryDelegate {
     func didLoadDataFromServer() {
-        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
         questionFactory?.requestNextQuestion()
     }
     
     func didFailToLoadData(with error: any Error) {
-        showNetworkError(message: error.localizedDescription)
+        showNetworkError(message: "Невозможно загрузить данные")
     }
     
     // MARK: - QuestionFactoryDelegate
