@@ -17,7 +17,8 @@ final class MovieQuizViewController: UIViewController {
         case forward
     }
     
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet private var loadAllQuestionactivityIndicator: UIActivityIndicatorView!
+    @IBOutlet private var loadNextQuestionactivityIndicator: UIActivityIndicatorView!
     private var statisticService: StatisticServiceProtocol = StatisticService()
     private var alertPresenter = ResultAlertPresenter()
     weak var delegate: QuestionFactoryDelegate?
@@ -82,6 +83,8 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.cornerRadius = 20
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
         setAnswerButtonsEnabled(false)
+        
+        loadNextQuestionactivityIndicator.startAnimating()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
@@ -159,12 +162,12 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
+        loadAllQuestionactivityIndicator.isHidden = false
+        loadAllQuestionactivityIndicator.startAnimating()
     }
     
     private func showNetworkError(message: String) {
-        activityIndicator.stopAnimating()
+        loadAllQuestionactivityIndicator.stopAnimating()
         
         let model = AlertModel(title: "Что-то пошло не так(", message: message, buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else { return }
@@ -176,11 +179,13 @@ final class MovieQuizViewController: UIViewController {
 
 extension MovieQuizViewController: QuestionFactoryDelegate {
     func didLoadDataFromServer() {
-        activityIndicator.stopAnimating()
+        loadAllQuestionactivityIndicator.stopAnimating()
         questionFactory?.requestNextQuestion()
     }
     
     func didFailToLoadData(with error: any Error) {
+        loadAllQuestionactivityIndicator.stopAnimating()
+        loadNextQuestionactivityIndicator.stopAnimating()
         showNetworkError(message: "Невозможно загрузить данные")
     }
     
@@ -193,6 +198,7 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
+            self?.loadNextQuestionactivityIndicator.stopAnimating()
             self?.show(quiz: viewModel)
         }
     }

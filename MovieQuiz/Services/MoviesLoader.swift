@@ -26,10 +26,14 @@ struct MoviesLoader: MoviesLoading {
     func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void) {
         networkClient.fetch(url: mostPopularMoviesURL) { result in
             switch result {
-                case .success(let data):
+            case .success(let data):
                 do {
                     let mostPopularMovies = try JSONDecoder().decode(MostPopularMovies.self, from: data)
-                    handler(.success(mostPopularMovies))
+                    if !mostPopularMovies.errorMessage.isEmpty {
+                        let error = NSError(domain: "MoviesLoader", code: 0, userInfo: [NSLocalizedDescriptionKey: mostPopularMovies.errorMessage])
+                        handler(.failure(error)) }
+                    else {
+                        handler(.success(mostPopularMovies)) }
                 } catch {
                     handler(.failure(error))
                 }
