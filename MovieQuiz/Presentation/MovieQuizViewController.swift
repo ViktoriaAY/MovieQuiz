@@ -1,24 +1,18 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController {
-    // MARK: - Lifecycle
+    // MARK: - IBOutlets
     
-    struct ViewModel {
-        let image: UIImage
-        let question: String
-        let questionNumber: String
-    }
+    @IBOutlet private weak var loadAllQuestionactivityIndicator: UIActivityIndicatorView!
+    @IBOutlet private weak var loadNextQuestionactivityIndicator: UIActivityIndicatorView!
+    @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var questionLabel: UILabel!
+    @IBOutlet private weak var imageView: UIImageView!
+    @IBOutlet private weak var counterLabel: UILabel!
     
-    struct QuizQResponseResultViewModel {
-        let correctAnswerQuiz: Bool
-    }
+    // MARK: - Properties
     
-    private enum ScreenDirection {
-        case forward
-    }
-    
-    @IBOutlet private var loadAllQuestionactivityIndicator: UIActivityIndicatorView!
-    @IBOutlet private var loadNextQuestionactivityIndicator: UIActivityIndicatorView!
     private var statisticService: StatisticServiceProtocol = StatisticService()
     private var alertPresenter = ResultAlertPresenter()
     weak var delegate: QuestionFactoryDelegate?
@@ -28,20 +22,29 @@ final class MovieQuizViewController: UIViewController {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        //questionFactory = QuestionFactory(delegate: self)
-        questionFactory = QuestionFactory(moviesLoader:  MoviesLoader(), delegate: self)
-        showLoadingIndicator()
-        questionFactory?.loadData()
-     showFirstQuestion()
+    // MARK: - Nested Types
+    
+    private enum ScreenDirection {
+        case forward
     }
     
-    @IBOutlet weak var noButton: UIButton!
-    @IBOutlet weak var yesButton: UIButton!
-    @IBOutlet private var questionLabel: UILabel!
-    @IBOutlet private var imageView: UIImageView!
-    @IBOutlet private var counterLabel: UILabel!
+    // MARK: - Lifecycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupQuestionFactory()
+        loadData()
+    }
+    
+    private func setupQuestionFactory() {
+        questionFactory = QuestionFactory(moviesLoader:  MoviesLoader(), delegate: self)
+    }
+    
+    private func loadData() {
+        showLoadingIndicator()
+        questionFactory?.loadData()
+        showFirstQuestion()
+    }
     
     private func showFirstQuestion() {
         currentQuestionIndex = 0
@@ -50,14 +53,19 @@ final class MovieQuizViewController: UIViewController {
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let isCorrect = currentQuestion.correctAnswer == false
-        showAnswerResult(isCorrect: isCorrect)
+       handleAnswer(false)
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let isCorrect = currentQuestion.correctAnswer == true
+     handleAnswer(true)
+    }
+    
+    private func handleAnswer(_ givenAnswer: Bool) {
+        guard let currentQuestion else {
+            return
+        }
+        let isCorrect =
+            currentQuestion.correctAnswer == givenAnswer
         showAnswerResult(isCorrect: isCorrect)
     }
     
@@ -134,7 +142,6 @@ final class MovieQuizViewController: UIViewController {
     private func restartGame() {
         self.currentQuestionIndex = 0
         self.correctAnswers = 0
-       // self.questionFactory?.reset()
         questionFactory?.requestNextQuestion()
     }
     

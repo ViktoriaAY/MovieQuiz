@@ -4,7 +4,6 @@
 //
 //  Created by Виктория Юношева on 23.04.2026.
 //
-import Foundation
 import UIKit
 
 final class ResultAlertPresenter {
